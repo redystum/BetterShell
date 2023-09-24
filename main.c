@@ -18,13 +18,14 @@ int main() {
             char command[FILENAME_MAX];
             fgets(command, sizeof(command), stdin);
 
-            int result = execute(command);
+            int result = execute(command, currentDir);
 
             if (result == 1) {
                 break;
             }
         } else {
-            perror("getcwd() error");
+            perror("Please run this program in a directory on call it from terminal.");
+            system("pause");
             return 1;
         }
 

@@ -54,7 +54,7 @@ char* processedDir(char *currentDir){
 void navigation(char *currentDir){
 
     green();
-    printf("%s", getUserName());
+    printf("\n%s", getUserName());
     reset();
     printf("@");
     blue();
@@ -68,10 +68,19 @@ void navigation(char *currentDir){
     reset();
 }
 
-int execute(char *command){
+int execute(char *command, char *currentDir){
 
-    char *cmd = strtok(command, " ");
-    char *args = strtok(NULL, "\n");
+    char *cmd = strtok(strtok(command, " "), "\n");
+    char *args = strtok(command + strlen(cmd) + 1, "\n");
+    args = args == NULL ? "" : args;
+
+    if (strstr(args, "~") != NULL) {
+        char *homeDir = getUser();
+        char *newArgs = malloc(strlen(args) - 1 + strlen(homeDir) + 1);
+        strcpy(newArgs, homeDir);
+        strcat(newArgs, args + 1);
+        args = newArgs;
+    }
 
     if(strcmp(cmd, "exit") == 0){
         return 1;
@@ -87,7 +96,51 @@ int execute(char *command){
         return 0;
     }
 
-    system(command);
+    char *run = malloc(strlen(cmd) + strlen(args) + 1);
+    strcpy(run, cmd);
+    strcat(run, " ");
+    strcat(run, args);
+
+
+    if (strcmp(cmd, "ls") == 0) {
+        // run ls and get the output to a string and print it separated by coma
+
+        FILE *fp;
+        char path[1035];
+        fp = popen(run, "r");
+        if (fp == NULL) {
+            perror("Failed to run command\n" );
+            return 0;
+        }
+
+        while (fgets(path, sizeof(path), fp) != NULL) {
+
+            // fullpath = currentDir + \ + path
+            char *fullPath = malloc(strlen(currentDir) + strlen(path) + 1);
+            strcpy(fullPath, currentDir);
+            strcat(fullPath, "\\");
+            strcat(fullPath, path);
+
+            fullPath = strtok(fullPath, "\n");
+
+            if (isDirectory(fullPath)) {
+                green();
+                printf("%s", path);
+                reset();
+            } else {
+                printf("%s", path);
+            }
+        }
+
+        pclose(fp);
+
+        free(run);
+        return 0;
+    }
+
+    system(run);
+
+    free(run);
 
     return 0;
 }
