@@ -1,0 +1,3 @@
+D:/Programacao/C/betterShell/cmake-build-debug/CMakeFiles/betterShell.dir
+D:/Programacao/C/betterShell/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/Programacao/C/betterShell/cmake-build-debug/CMakeFiles/rebuild_cache.dir
