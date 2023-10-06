@@ -11,6 +11,7 @@
 #include <string.h>
 #include "colors.h"
 #include "utils.h"
+#include "customCommands.h"
 
 char *getUser() {
     char *username = getenv("USERPROFILE"); // output: C:\Users\redystum
@@ -68,16 +69,6 @@ void navigation(char *currentDir) {
     reset();
 }
 
-int getTerminalWidth() {
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    int columns;
-
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-    columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-
-    return columns;
-}
-
 int execute(char *command, char *currentDir) {
 
     char *cmd = strtok(strtok(command, " "), "\n");
@@ -106,53 +97,23 @@ int execute(char *command, char *currentDir) {
         return 0;
     }
 
+    if (strcmp(cmd, "pwd") == 0 || strcmp(cmd, ".") == 0) {
+        printf("%s\n", currentDir);
+        return 0;
+    }
+
+    if (strcmp(cmd, "..") == 0){
+        chdir("..");
+        return 0;
+    }
+
     char *run = malloc(strlen(cmd) + strlen(args) + 1);
     strcpy(run, cmd);
     strcat(run, " ");
     strcat(run, args);
 
     if (strcmp(cmd, "ls") == 0) {
-        FILE *fp;
-        char path[4096];
-        fp = popen(run, "r");
-        if (fp == NULL) {
-            perror("Failed to run command\n");
-            return 0;
-        }
-
-        int lineSize = 0;
-        int width = getTerminalWidth();
-        while (fgets(path, sizeof(path), fp) != NULL) {
-
-            path[strcspn(path, "\n")] = 0;
-
-            lineSize += strlen(path) + 12;
-
-            char *fullPath = malloc(strlen(currentDir) + strlen(path) + 1);
-            strcpy(fullPath, currentDir);
-            strcat(fullPath, "\\");
-            strcat(fullPath, path);
-
-            fullPath = strtok(fullPath, "\n");
-
-            if (isDirectory(fullPath)) {
-                green();
-                printf("%s  \t", path);
-                reset();
-            } else {
-                printf("%s  \t", path);
-            }
-
-            if (lineSize >= width) {
-                printf("\n");
-                lineSize = 0;
-            }
-        }
-
-        pclose(fp);
-
-        free(run);
-        return 0;
+       return ls(run, currentDir);
     }
 
     system(run);
