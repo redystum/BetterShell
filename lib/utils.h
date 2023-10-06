@@ -28,4 +28,15 @@ bool isDirectory(const char *path) {
             (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
+char *trim(char *s) {
+    char *ptr;
+    if (!s)
+        return s;
+    if (!*s)
+        return s;      // handle empty string
+    for (ptr = s + strlen(s) - 1; (ptr >= s) && isspace(*ptr); --ptr);
+    ptr[1] = '\0';
+    return s;
+}
+
 #endif //BETTERSHELL_UTILS_H

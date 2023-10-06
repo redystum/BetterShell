@@ -12,33 +12,33 @@
 #include "colors.h"
 #include "utils.h"
 
-char* getUser(){
+char *getUser() {
     char *username = getenv("USERPROFILE"); // output: C:\Users\redystum
     char *copy = strdup(username);
     return copy;
 }
 
-char* getUserName(){
+char *getUserName() {
 
     char *userName = getUser();
 
     char *user = strrchr(userName, '\\');
-    memmove(user, user+1, strlen(user));
+    memmove(user, user + 1, strlen(user));
 
     return user;
 }
 
-char* getDisc(char *currentDir){
+char *getDisc(char *currentDir) {
     char *dir = strdup(currentDir);
     char *disc = strtok(dir, ":");
     return disc;
 }
 
-char* processedDir(char *currentDir){
+char *processedDir(char *currentDir) {
     char *homeDir = getUser();
     char *dir = strdup(currentDir);
 
-    if(startsWith(homeDir, dir)){
+    if (startsWith(homeDir, dir)) {
         char *home = "~";
         char *newDir = malloc(strlen(dir) + strlen(home) - strlen(homeDir) + 1);
         strcpy(newDir, home);
@@ -51,7 +51,7 @@ char* processedDir(char *currentDir){
     }
 }
 
-void navigation(char *currentDir){
+void navigation(char *currentDir) {
 
     green();
     printf("\n%s", getUserName());
@@ -68,7 +68,17 @@ void navigation(char *currentDir){
     reset();
 }
 
-int execute(char *command, char *currentDir){
+int getTerminalWidth() {
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    int columns;
+
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+
+    return columns;
+}
+
+int execute(char *command, char *currentDir) {
 
     char *cmd = strtok(strtok(command, " "), "\n");
     char *args = strtok(command + strlen(cmd) + 1, "\n");
@@ -82,11 +92,11 @@ int execute(char *command, char *currentDir){
         args = newArgs;
     }
 
-    if(strcmp(cmd, "exit") == 0){
+    if (strcmp(cmd, "exit") == 0) {
         return 1;
     }
 
-    if(strcmp(cmd, "clear") == 0 || strcmp(cmd, "cls") == 0){
+    if (strcmp(cmd, "clear") == 0 || strcmp(cmd, "cls") == 0) {
         cls();
         return 0;
     }
@@ -101,21 +111,23 @@ int execute(char *command, char *currentDir){
     strcat(run, " ");
     strcat(run, args);
 
-
     if (strcmp(cmd, "ls") == 0) {
-        // run ls and get the output to a string and print it separated by coma
-
         FILE *fp;
-        char path[1035];
+        char path[4096];
         fp = popen(run, "r");
         if (fp == NULL) {
-            perror("Failed to run command\n" );
+            perror("Failed to run command\n");
             return 0;
         }
 
+        int lineSize = 0;
+        int width = getTerminalWidth();
         while (fgets(path, sizeof(path), fp) != NULL) {
 
-            // fullpath = currentDir + \ + path
+            path[strcspn(path, "\n")] = 0;
+
+            lineSize += strlen(path) + 12;
+
             char *fullPath = malloc(strlen(currentDir) + strlen(path) + 1);
             strcpy(fullPath, currentDir);
             strcat(fullPath, "\\");
@@ -125,10 +137,16 @@ int execute(char *command, char *currentDir){
 
             if (isDirectory(fullPath)) {
                 green();
-                printf("%s", path);
+                printf("%s  \t", path);
                 reset();
             } else {
-                printf("%s", path);
+                printf("%s  \t", path);
+            }
+
+            printf("%s  \t", path);
+            if (lineSize >= width) {
+                printf("\n");
+                lineSize = 0;
             }
         }
 

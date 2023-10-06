@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <locale.h>
 #include "lib/shell.h"
 
 
 int main() {
+
+    setlocale(LC_ALL, "");
 
     char currentDir[FILENAME_MAX];
 
@@ -17,6 +20,11 @@ int main() {
 
             char command[FILENAME_MAX];
             fgets(command, sizeof(command), stdin);
+
+            // if trim command == "" continue
+            if (strcmp(command, "\n") == 0 || strcmp(command, "\r\n") == 0 || strcmp(command, "\r") == 0 || strcmp(command, "\0") == 0 || strcmp(trim(command), "") == 0) {
+                continue;
+            }
 
             int result = execute(command, currentDir);
 
