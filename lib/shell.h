@@ -112,6 +112,10 @@ int execute(char *command, char *currentDir) {
     strcat(run, " ");
     strcat(run, args);
 
+    if (strcmp(cmd, "la") == 0){
+        return la(currentDir, args);
+    }
+
     if (strcmp(cmd, "ls") == 0) {
        return ls(run, currentDir);
     }

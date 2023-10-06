@@ -57,4 +57,12 @@ int ls(char *run, char *currentDir) {
     return 0;
 }
 
+int la(char *currentDir, char *args){
+    char *customRun = malloc(strlen("ls -a") + strlen(args) + 1);
+    strcpy(customRun, "ls -a");
+    strcat(customRun, " ");
+    strcat(customRun, args);
+    return ls(customRun, currentDir);
+}
+
 #endif //BETTERSHELL_CUSTOMCOMMANDS_H

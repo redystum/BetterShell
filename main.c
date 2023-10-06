@@ -21,7 +21,13 @@ int main() {
             char command[FILENAME_MAX];
             fgets(command, sizeof(command), stdin);
 
-            if (strcmp(command, "\n") == 0 || strcmp(command, "\r\n") == 0 || strcmp(command, "\r") == 0 || strcmp(command, "\0") == 0 || strcmp(trim(command), "") == 0) {
+            if (
+                    strcmp(command, "\n") == 0 ||
+                    strcmp(command, "\r\n") == 0 ||
+                    strcmp(command, "\r") == 0 ||
+                    strcmp(command, "\0") == 0 ||
+                    strcmp(trim(command), "") == 0
+            ) {
                 continue;
             }
 
