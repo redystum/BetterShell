@@ -143,7 +143,6 @@ int execute(char *command, char *currentDir) {
                 printf("%s  \t", path);
             }
 
-            printf("%s  \t", path);
             if (lineSize >= width) {
                 printf("\n");
                 lineSize = 0;
