@@ -7,4 +7,5 @@ add_executable(betterShell main.c
         lib/colors.h
         lib/shell.h
         lib/utils.h
+        lib/customCommands.h
 )

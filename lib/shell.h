@@ -11,34 +11,35 @@
 #include <string.h>
 #include "colors.h"
 #include "utils.h"
+#include "customCommands.h"
 
-char* getUser(){
+char *getUser() {
     char *username = getenv("USERPROFILE"); // output: C:\Users\redystum
     char *copy = strdup(username);
     return copy;
 }
 
-char* getUserName(){
+char *getUserName() {
 
     char *userName = getUser();
 
     char *user = strrchr(userName, '\\');
-    memmove(user, user+1, strlen(user));
+    memmove(user, user + 1, strlen(user));
 
     return user;
 }
 
-char* getDisc(char *currentDir){
+char *getDisc(char *currentDir) {
     char *dir = strdup(currentDir);
     char *disc = strtok(dir, ":");
     return disc;
 }
 
-char* processedDir(char *currentDir){
+char *processedDir(char *currentDir) {
     char *homeDir = getUser();
     char *dir = strdup(currentDir);
 
-    if(startsWith(homeDir, dir)){
+    if (startsWith(homeDir, dir)) {
         char *home = "~";
         char *newDir = malloc(strlen(dir) + strlen(home) - strlen(homeDir) + 1);
         strcpy(newDir, home);
@@ -51,10 +52,10 @@ char* processedDir(char *currentDir){
     }
 }
 
-void navigation(char *currentDir){
+void navigation(char *currentDir) {
 
     green();
-    printf("%s", getUserName());
+    printf("\n%s", getUserName());
     reset();
     printf("@");
     blue();
@@ -68,16 +69,25 @@ void navigation(char *currentDir){
     reset();
 }
 
-int execute(char *command){
+int execute(char *command, char *currentDir) {
 
-    char *cmd = strtok(command, " ");
-    char *args = strtok(NULL, "\n");
+    char *cmd = strtok(strtok(command, " "), "\n");
+    char *args = strtok(command + strlen(cmd) + 1, "\n");
+    args = args == NULL ? "" : args;
 
-    if(strcmp(cmd, "exit") == 0){
+    if (strstr(args, "~") != NULL) {
+        char *homeDir = getUser();
+        char *newArgs = malloc(strlen(args) - 1 + strlen(homeDir) + 1);
+        strcpy(newArgs, homeDir);
+        strcat(newArgs, args + 1);
+        args = newArgs;
+    }
+
+    if (strcmp(cmd, "exit") == 0) {
         return 1;
     }
 
-    if(strcmp(cmd, "clear") == 0 || strcmp(cmd, "cls") == 0){
+    if (strcmp(cmd, "clear") == 0 || strcmp(cmd, "cls") == 0) {
         cls();
         return 0;
     }
@@ -87,7 +97,28 @@ int execute(char *command){
         return 0;
     }
 
-    system(command);
+    if (strcmp(cmd, "pwd") == 0 || strcmp(cmd, ".") == 0) {
+        printf("%s\n", currentDir);
+        return 0;
+    }
+
+    if (strcmp(cmd, "..") == 0){
+        chdir("..");
+        return 0;
+    }
+
+    char *run = malloc(strlen(cmd) + strlen(args) + 1);
+    strcpy(run, cmd);
+    strcat(run, " ");
+    strcat(run, args);
+
+    if (strcmp(cmd, "ls") == 0) {
+       return ls(run, currentDir);
+    }
+
+    system(run);
+
+    free(run);
 
     return 0;
 }

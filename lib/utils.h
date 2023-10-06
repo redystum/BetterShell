@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <corecrt.h>
 #include <string.h>
+#include <windows.h>
 
 bool startsWith(const char *pre, const char *str)
 {
@@ -18,6 +19,34 @@ bool startsWith(const char *pre, const char *str)
 
 void cls(){
     system("cls");
+}
+
+bool isDirectory(const char *path) {
+    DWORD dwAttrib = GetFileAttributes(path);
+
+    return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
+            (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+char *trim(char *s) {
+    char *ptr;
+    if (!s)
+        return s;
+    if (!*s)
+        return s;      // handle empty string
+    for (ptr = s + strlen(s) - 1; (ptr >= s) && isspace(*ptr); --ptr);
+    ptr[1] = '\0';
+    return s;
+}
+
+int getTerminalWidth() {
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    int columns;
+
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+
+    return columns;
 }
 
 #endif //BETTERSHELL_UTILS_H
